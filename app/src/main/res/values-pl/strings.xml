@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">LockIt</string>
+    <string name="welcome">Witaj!</string>
+    <string name="welcome_back">Witaj ponownie!</string>
+    <string name="create_passkey">Utwórz swój klucz dostępu!</string>
+    <string name="verify_passkey">Zweryfikuj swój klucz dostępu!</string>
+    <string name="passkey">Klucz dostępu</string>
+    <string name="confirm_passkey">Potwierdź klucz dostępu</string>
+    <string name="login">ZALOGUJ</string>
+    <string name="register">ZAREJESTRUJ</string>
+    <string name="logout">Wyloguj</string>
+    <string name="logout_confirm_title">Wyloguj</string>
+    <string name="logout_confirm_msg">Czy na pewno chcesz się wylogować?</string>
+    <string name="cancel">Anuluj</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+    <string name="settings">Ustawienia</string>
+    <string name="account">Konto</string>
+    <string name="notifications">Powiadomienia</string>
+    <string name="language">Język</string>
+    <string name="reset_master_key">Resetuj klucz główny</string>
+    <string name="dark_mode">Tryb ciemny</string>
+    <string name="search_placeholder">Czego szukasz?</string>
+    <string name="pass_tools">Narzędzia</string>
+    <string name="locker">Sejf</string>
+    <string name="pass_meter">Miernik haseł</string>
+    <string name="generator">Generator</string>
+    <string name="save">ZAPISZ</string>
+    <string name="reset_confirm_title">Resetuj klucz główny</string>
+    <string name="reset_confirm_msg">Czy na pewno chcesz zresetować klucz główny? Zostaniesz wylogowany.</string>
+    <string name="delete_confirm_title">Usuń wpis</string>
+    <string name="delete_confirm_msg">Czy na pewno chcesz usunąć ten wpis hasła?</string>
+    <string name="created_at">Utworzono: %s</string>
+    <string name="last_login">Ostatnie logowanie: %s</string>
+</resources>
