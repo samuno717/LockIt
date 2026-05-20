@@ -102,8 +102,6 @@ The app starts at **LoginScreen**, which gates access behind the master passkey.
 
 ## 🎨 Mock-ups
 
-> 📎 _Add your Figma exports or screenshots to the `docs/` folder and update the paths below._
-
 <p align="center">
   <img src="docs/mockup-login.png" alt="Login Screen" width="220"/>
   &nbsp;&nbsp;
@@ -353,4 +351,3 @@ LockIt/
 
 ---
 
-Developed with ❤️ for people who value their privacy.
