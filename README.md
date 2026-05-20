@@ -77,7 +77,7 @@ graph TD
 The app starts at **LoginScreen**, which gates access behind the master passkey. After authentication the user lands on **LockerScreen** — the central vault hub. From there, a bottom navigation bar gives access to **PassToolsScreen** and **SettingsScreen** at all times.
 
 <p align="center">
-  <img src="navmap.jpg" alt="LockIt Navigation Map" width="900">
+  <img src="docs/navmap.jpg" alt="LockIt Navigation Map" width="900">
 </p>
 
 ### Screen overview
