@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.lockit.data.LockItRepository
+import com.example.lockit.model.Category
 import com.example.lockit.model.PasswordEntry
 import com.example.lockit.model.User
+import com.example.lockit.security.PasswordHasher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,8 +32,52 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val categories: StateFlow<List<String>> = repository.allCategories
+        .map { list -> list.map { it.name } }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     init {
         loadUser()
+        // Encrypt any password rows left over from before field encryption existed.
+        viewModelScope.launch {
+            repository.encryptLegacyPasswords()
+        }
+    }
+
+    fun addCategory(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        viewModelScope.launch {
+            repository.insertCategory(Category(name = trimmed))
+        }
+    }
+
+    fun renameCategory(oldName: String, newName: String) {
+        val trimmed = newName.trim()
+        if (trimmed.isEmpty() || trimmed == oldName) return
+        viewModelScope.launch {
+            // Move the entries onto the new name first so nothing is orphaned.
+            repository.reassignPasswords(oldName, trimmed)
+            if (repository.categoryExists(trimmed)) {
+                // Target folder already exists -> merge by dropping the old one.
+                repository.deleteCategoryByName(oldName)
+            } else {
+                repository.renameCategory(oldName, trimmed)
+            }
+        }
+    }
+
+    fun deleteCategory(name: String) {
+        viewModelScope.launch {
+            repository.deletePasswordsByCategory(name)
+            repository.deleteCategoryByName(name)
+        }
+    }
+
+    fun getPasswordCount(name: String, onResult: (Int) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.countPasswordsInCategory(name))
+        }
     }
 
     private fun loadUser() {
@@ -46,10 +92,27 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
 
     fun registerUser(username: String, passkey: String) {
         viewModelScope.launch {
-            val user = User(username = username, passkey = passkey)
+            val user = User(username = username, passkey = PasswordHasher.hash(passkey))
             repository.insertUser(user)
             _currentUser.value = user
         }
+    }
+
+    /**
+     * Verifies the entered passkey against the stored hash. If the stored value is still
+     * legacy plaintext, it is transparently upgraded to a hash on the first successful login.
+     */
+    fun verifyPasskey(input: String): Boolean {
+        val user = _currentUser.value ?: return false
+        val ok = PasswordHasher.verify(input, user.passkey)
+        if (ok && PasswordHasher.needsUpgrade(user.passkey)) {
+            viewModelScope.launch {
+                val upgraded = user.copy(passkey = PasswordHasher.hash(input))
+                repository.insertUser(upgraded)
+                _currentUser.value = upgraded
+            }
+        }
+        return ok
     }
 
     fun updateProfileImage(uri: String) {

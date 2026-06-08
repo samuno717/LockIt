@@ -19,7 +19,7 @@ fun PassToolsScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
         ) {
             PassMeterScreen(onBack = onBack)
-            GeneratorScreen(onBack = onBack)
+            PassMakerScreen(onBack = onBack)
         }
     }
 }

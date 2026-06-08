@@ -3,8 +3,6 @@ package com.example.lockit.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +23,6 @@ fun AccountScreen(
     onBack: () -> Unit
 ) {
     val user by viewModel.currentUser.collectAsState()
-    var passkeyVisible by remember { mutableStateOf(false) }
     val dateFormatter = remember { SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()) }
 
     Scaffold(
@@ -34,7 +31,7 @@ fun AccountScreen(
                 title = { Text(stringResource(R.string.account)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -48,48 +45,40 @@ fun AccountScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Column {
-                Text(text = "Username", fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
-                Text(text = user?.username ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.username), fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(text = user?.username ?: stringResource(R.string.not_available), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
             Column {
-                Text(text = "ID", fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
-                Text(text = user?.id?.toString() ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.id_label), fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(text = user?.id?.toString() ?: stringResource(R.string.not_available), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
             
             Column {
                 Text(text = stringResource(R.string.passkey), fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (passkeyVisible) (user?.passkey ?: "N/A") else "****",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = { passkeyVisible = !passkeyVisible }) {
-                        Icon(
-                            imageVector = if (passkeyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = null
-                        )
-                    }
-                }
+                Text(text = "••••••••", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.passkey_hidden),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
             
             Column {
-                Text(text = "Statistics", fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(text = stringResource(R.string.statistics), fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
                 Text(
-                    text = stringResource(R.string.created_at, user?.createdAt?.let { dateFormatter.format(Date(it)) } ?: "N/A"),
+                    text = stringResource(R.string.created_at, user?.createdAt?.let { dateFormatter.format(Date(it)) } ?: stringResource(R.string.not_available)),
                     fontSize = 16.sp
                 )
                 Text(
-                    text = stringResource(R.string.last_login, user?.lastLogin?.let { dateFormatter.format(Date(it)) } ?: "N/A"),
+                    text = stringResource(R.string.last_login, user?.lastLogin?.let { dateFormatter.format(Date(it)) } ?: stringResource(R.string.not_available)),
                     fontSize = 16.sp
                 )
             }
 
             Column {
-                Text(text = "Info", fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
-                Text(text = "Your account is stored locally and protected by the master passkey.", fontSize = 16.sp)
+                Text(text = stringResource(R.string.info), fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(text = stringResource(R.string.account_info_msg), fontSize = 16.sp)
             }
         }
     }

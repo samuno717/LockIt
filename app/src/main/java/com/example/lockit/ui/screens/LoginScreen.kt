@@ -26,7 +26,6 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit
 ) {
     var passkey by remember { mutableStateOf("") }
-    val user by viewModel.currentUser.collectAsState()
     var showError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -54,7 +53,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = passkey,
             onValueChange = { passkey = it; showError = false },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             isError = showError,
@@ -69,14 +68,14 @@ fun LoginScreen(
         )
         
         if (showError) {
-            Text(text = "Invalid passkey", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Text(text = stringResource(R.string.invalid_passkey), color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
         
         Spacer(modifier = Modifier.height(32.dp))
         
         Button(
             onClick = {
-                if (user?.passkey == passkey) {
+                if (viewModel.verifyPasskey(passkey)) {
                     onLoginSuccess()
                 } else {
                     showError = true
@@ -91,7 +90,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Reminder: Keep Yourself Secure",
+            text = stringResource(R.string.login_reminder),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -102,7 +101,7 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Don't have a passkey? Create one")
+            Text(stringResource(R.string.no_passkey_create))
         }
     }
 }

@@ -32,4 +32,75 @@
     <string name="delete_confirm_msg">Czy na pewno chcesz usunąć ten wpis hasła?</string>
     <string name="created_at">Utworzono: %s</string>
     <string name="last_login">Ostatnie logowanie: %s</string>
+
+    <!-- Auth -->
+    <string name="password">Hasło</string>
+    <string name="username">Nazwa użytkownika</string>
+    <string name="repeat_password">Powtórz hasło</string>
+    <string name="invalid_passkey">Nieprawidłowy klucz dostępu</string>
+    <string name="passkeys_no_match">Klucze dostępu nie są takie same</string>
+    <string name="login_reminder">Pamiętaj: dbaj o swoje bezpieczeństwo</string>
+    <string name="no_passkey_create">Nie masz klucza dostępu? Utwórz go</string>
+
+    <!-- Common -->
+    <string name="back">Wstecz</string>
+    <string name="add">Dodaj</string>
+    <string name="delete">Usuń</string>
+    <string name="close">Zamknij</string>
+    <string name="search">Szukaj</string>
+    <string name="none">Brak</string>
+    <string name="not_available">Brak</string>
+
+    <!-- Account -->
+    <string name="id_label">ID</string>
+    <string name="statistics">Statystyki</string>
+    <string name="info">Informacje</string>
+    <string name="account_info_msg">Twoje konto jest przechowywane lokalnie i chronione kluczem głównym.</string>
+    <string name="passkey_hidden">Ukryte ze względów bezpieczeństwa (przechowywane jako hash)</string>
+    <string name="default_username">Użytkownik</string>
+
+    <!-- Notifications -->
+    <string name="no_notifications">Brak powiadomień.</string>
+
+    <!-- Settings -->
+    <string name="manage_lockit">Zarządzaj swoim LOCKIT.</string>
+    <string name="app_tutorial">Samouczek aplikacji</string>
+
+    <!-- Locker -->
+    <string name="locker_header">TWOJE BEZPIECZEŃSTWO ZACZYNA SIĘ TUTAJ. WITAJ PONOWNIE.</string>
+    <string name="new_label">Nowy</string>
+    <string name="new_folder">Nowy folder</string>
+    <string name="folder_name">Nazwa folderu</string>
+    <string name="edit_folder">Edytuj folder</string>
+    <string name="delete_folder_q">Usunąć folder?</string>
+    <string name="delete_folder_msg">Folder „%1$s” oraz %2$d zapisanych haseł zostaną trwale usunięte.</string>
+    <string name="delete_folder_msg_empty">Folder „%1$s” zostanie usunięty.</string>
+    <string name="reveal_password">Pokaż hasło</string>
+    <string name="hide_password">Ukryj hasło</string>
+
+    <!-- Add login / fields -->
+    <string name="new_login">Nowy wpis</string>
+    <string name="field_website">strona</string>
+    <string name="field_email">e-mail</string>
+    <string name="field_password">hasło</string>
+    <string name="field_folder">folder</string>
+    <string name="label_email">e-mail</string>
+    <string name="label_password">hasło</string>
+    <string name="label_website">strona</string>
+    <string name="icon">Ikona</string>
+    <string name="choose_icon">Wybierz ikonę</string>
+
+    <!-- PassMaker -->
+    <string name="length_label">Długość: %d</string>
+    <string name="min_numbers">Minimum cyfr</string>
+    <string name="min_symbols">Minimum symboli</string>
+    <string name="password_copied">Skopiowano hasło</string>
+
+    <!-- PassMeter -->
+    <string name="try_strength">Sprawdź swoją siłę!</string>
+    <string name="type_password_here">Wpisz tutaj swoje hasło…</string>
+    <string name="password_strength">Siła hasła:</string>
+    <string name="strength_weak">Słabe</string>
+    <string name="strength_medium">Średnie</string>
+    <string name="strength_strong">Silne</string>
 </resources>

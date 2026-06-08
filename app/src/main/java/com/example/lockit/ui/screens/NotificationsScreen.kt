@@ -20,7 +20,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
                 title = { Text(stringResource(R.string.notifications)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -32,7 +32,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "No notifications yet.")
+            Text(text = stringResource(R.string.no_notifications))
         }
     }
 }

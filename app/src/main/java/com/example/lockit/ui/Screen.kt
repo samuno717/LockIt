@@ -6,7 +6,7 @@ sealed class Screen(val route: String) {
     object Locker : Screen("locker")
     object Settings : Screen("settings")
     object PassMeter : Screen("pass_meter")
-    object Generator : Screen("generator")
+    object PassMaker : Screen("passmaker")
     object AddPassword : Screen("add_password")
     object Account : Screen("account")
     object Notifications : Screen("notifications")

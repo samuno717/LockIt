@@ -1,9 +1,11 @@
 package com.example.lockit
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.lockit.util.LocaleHelper
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
@@ -24,6 +26,10 @@ import com.example.lockit.ui.theme.LockItTheme
 import com.example.lockit.viewmodel.LockItViewModel
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -109,8 +115,7 @@ fun LockItApp(viewModel: LockItViewModel) {
             composable(Screen.Locker.route) {
                 LockerScreen(
                     viewModel = viewModel,
-                    onNavigateToAdd = { navController.navigate(Screen.AddPassword.route) },
-                    onNavigateToDetails = { id -> navController.navigate(Screen.PasswordDetails.createRoute(id)) }
+                    onNavigateToAdd = { navController.navigate(Screen.AddPassword.route) }
                 )
             }
             composable(Screen.Settings.route) {

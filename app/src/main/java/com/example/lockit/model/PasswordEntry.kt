@@ -12,5 +12,7 @@ data class PasswordEntry(
     val password: String,
     val website: String,
     val category: String,
-    val iconRes: Int
+    val iconRes: Int = 0,
+    // Drawable resource name of the chosen icon (e.g. "fi_brands_steam"); "" = letter avatar.
+    val iconKey: String = ""
 )

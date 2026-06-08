@@ -55,7 +55,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            placeholder = { Text("Username") },
+            placeholder = { Text(stringResource(R.string.username)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -66,7 +66,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = passkey,
             onValueChange = { passkey = it; showError = false },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -84,7 +84,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = confirmPasskey,
             onValueChange = { confirmPasskey = it; showError = false },
-            placeholder = { Text("Repeat Password") },
+            placeholder = { Text(stringResource(R.string.repeat_password)) },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             isError = showError,
@@ -99,7 +99,7 @@ fun RegisterScreen(
         )
         
         if (showError) {
-            Text(text = "Passkeys do not match", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Text(text = stringResource(R.string.passkeys_no_match), color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
         
         Spacer(modifier = Modifier.height(32.dp))
@@ -117,7 +117,7 @@ fun RegisterScreen(
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
         ) {
-            Text(stringResource(R.string.login), color = MaterialTheme.colorScheme.surface)
+            Text(stringResource(R.string.register), color = MaterialTheme.colorScheme.surface)
         }
     }
 }
