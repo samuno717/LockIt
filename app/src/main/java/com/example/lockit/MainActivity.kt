@@ -137,7 +137,6 @@ fun LockItApp(viewModel: LockItViewModel) {
                 SettingsScreen(
                     viewModel = viewModel,
                     onNavigateToAccount = { navController.navigate(Screen.Account.route) },
-                    onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
                     onNavigateToVideo = { navController.navigate("video_player") },
                     onNavigateToAudio = { navController.navigate("audio_player") },
                     onLogout = { navController.navigate(Screen.Login.route) { popUpTo(0) } }
@@ -160,9 +159,6 @@ fun LockItApp(viewModel: LockItViewModel) {
             }
             composable(Screen.Account.route) {
                 AccountScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
-            }
-            composable(Screen.Notifications.route) {
-                NotificationsScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = Screen.PasswordDetails.route,

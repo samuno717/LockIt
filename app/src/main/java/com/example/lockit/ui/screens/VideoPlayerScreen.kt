@@ -20,11 +20,12 @@ import androidx.media3.ui.PlayerView
 @Composable
 fun VideoPlayerScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val videoUrl = "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(videoUrl))
+            // Próba załadowania lokalnego pliku tutorial.mp4 z res/raw
+            val packagePath = "android.resource://${context.packageName}/${R.raw.tutorial}"
+            setMediaItem(MediaItem.fromUri(packagePath))
             prepare()
             playWhenReady = true
         }

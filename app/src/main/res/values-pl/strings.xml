@@ -16,7 +16,6 @@
     <string name="no">Nie</string>
     <string name="settings">Ustawienia</string>
     <string name="account">Konto</string>
-    <string name="notifications">Powiadomienia</string>
     <string name="language">Język</string>
     <string name="reset_master_key">Resetuj klucz główny</string>
     <string name="dark_mode">Tryb ciemny</string>
@@ -58,9 +57,6 @@
     <string name="account_info_msg">Twoje konto jest przechowywane lokalnie i chronione kluczem głównym.</string>
     <string name="passkey_hidden">Ukryte ze względów bezpieczeństwa (przechowywane jako hash)</string>
     <string name="default_username">Użytkownik</string>
-
-    <!-- Notifications -->
-    <string name="no_notifications">Brak powiadomień.</string>
 
     <!-- Settings -->
     <string name="manage_lockit">Zarządzaj swoim LOCKIT.</string>

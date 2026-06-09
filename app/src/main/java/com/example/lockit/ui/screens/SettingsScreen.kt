@@ -30,7 +30,6 @@ import java.util.*
 fun SettingsScreen(
     viewModel: LockItViewModel,
     onNavigateToAccount: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
     onNavigateToVideo: () -> Unit,
     onNavigateToAudio: () -> Unit,
     onLogout: () -> Unit
@@ -171,7 +170,6 @@ fun SettingsScreen(
         
         LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item { SettingItem(stringResource(R.string.account), onNavigateToAccount) }
-            item { SettingItem(stringResource(R.string.notifications), onNavigateToNotifications) }
             item { SettingItem(stringResource(R.string.language), { showLanguageDialog = true }) }
             item { SettingItem(stringResource(R.string.reset_master_key), { showResetDialog = true }) }
             item { SettingItem(stringResource(R.string.app_tutorial), onNavigateToVideo) }

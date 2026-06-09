@@ -1,6 +1,7 @@
 package com.example.lockit.ui.screens
 
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -29,6 +31,10 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -326,6 +332,8 @@ private fun EditFolderDialog(
 fun PasswordItem(password: PasswordEntry, onDelete: () -> Unit) {
     var revealed by remember { mutableStateOf(false) }
     var showDetailsPopup by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     if (showDetailsPopup) {
         PasswordDetailsPopup(
@@ -368,6 +376,18 @@ fun PasswordItem(password: PasswordEntry, onDelete: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 RevealablePassword(password = password.password, revealed = revealed)
+            }
+
+            IconButton(onClick = {
+                clipboardManager.setText(AnnotatedString(password.password))
+                Toast.makeText(context, context.getString(R.string.password_copied), Toast.LENGTH_SHORT).show()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.ContentCopy,
+                    contentDescription = stringResource(R.string.password_copied),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             IconButton(onClick = { revealed = !revealed }) {

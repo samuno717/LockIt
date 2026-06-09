@@ -16,7 +16,6 @@
     <string name="no">No</string>
     <string name="settings">Settings</string>
     <string name="account">Account</string>
-    <string name="notifications">Notifications</string>
     <string name="language">Language</string>
     <string name="reset_master_key">Reset master passkey</string>
     <string name="dark_mode">Dark Mode</string>
@@ -58,9 +57,6 @@
     <string name="account_info_msg">Your account is stored locally and protected by the master passkey.</string>
     <string name="passkey_hidden">Hidden for security (stored hashed)</string>
     <string name="default_username">User</string>
-
-    <!-- Notifications -->
-    <string name="no_notifications">No notifications yet.</string>
 
     <!-- Settings -->
     <string name="manage_lockit">Manage your LOCKIT.</string>
