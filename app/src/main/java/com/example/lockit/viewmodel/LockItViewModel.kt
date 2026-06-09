@@ -18,6 +18,11 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
+    // True until the initial user lookup finishes — used to avoid flashing the wrong
+    // start screen before we know whether an account exists.
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -87,6 +92,7 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
             if (user != null) {
                 repository.insertUser(user.copy(lastLogin = System.currentTimeMillis()))
             }
+            _isLoading.value = false
         }
     }
 

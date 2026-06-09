@@ -97,6 +97,8 @@
     <string name="password_copied">Skopiowano hasło</string>
 
     <!-- PassMeter -->
+    <string name="passmeter_desc">Sprawdź, jak silne jest hasło</string>
+    <string name="passmaker_desc">Wygeneruj silne, losowe hasło</string>
     <string name="try_strength">Sprawdź swoją siłę!</string>
     <string name="type_password_here">Wpisz tutaj swoje hasło…</string>
     <string name="password_strength">Siła hasła:</string>

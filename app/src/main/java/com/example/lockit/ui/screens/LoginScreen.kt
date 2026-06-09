@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lockit.R
+import com.example.lockit.util.SoundPlayer
 import com.example.lockit.viewmodel.LockItViewModel
 
 @Composable
@@ -28,6 +30,7 @@ fun LoginScreen(
     var passkey by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -76,6 +79,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (viewModel.verifyPasskey(passkey)) {
+                    SoundPlayer.playRaw(context, "unlock")
                     onLoginSuccess()
                 } else {
                     showError = true

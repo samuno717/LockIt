@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.lockit.util.LocaleHelper
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
@@ -48,18 +51,19 @@ class MainActivity : ComponentActivity() {
 fun LockItApp(viewModel: LockItViewModel) {
     val navController = rememberNavController()
     val user by viewModel.currentUser.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomBar = currentRoute in listOf(Screen.Locker.route, Screen.Settings.route, Screen.PassMeter.route)
+    val showBottomBar = currentRoute in listOf(Screen.Locker.route, Screen.Settings.route, Screen.PassTools.route)
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
                     NavigationBarItem(
-                        selected = currentRoute == Screen.PassMeter.route,
-                        onClick = { navController.navigate(Screen.PassMeter.route) },
+                        selected = currentRoute == Screen.PassTools.route,
+                        onClick = { navController.navigate(Screen.PassTools.route) },
                         icon = { Icon(Icons.Default.GridView, contentDescription = null) },
                         label = { Text("Passtools", fontSize = 10.sp) },
                         colors = NavigationBarItemDefaults.colors(
@@ -94,6 +98,17 @@ fun LockItApp(viewModel: LockItViewModel) {
             }
         }
     ) { innerPadding ->
+        if (isLoading) {
+            // Wait for the initial user lookup so we land on the right start screen
+            // instead of briefly flashing Register before Login.
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         NavHost(
             navController = navController,
             startDestination = if (user == null) Screen.Register.route else Screen.Login.route,
@@ -128,8 +143,17 @@ fun LockItApp(viewModel: LockItViewModel) {
                     onLogout = { navController.navigate(Screen.Login.route) { popUpTo(0) } }
                 )
             }
+            composable(Screen.PassTools.route) {
+                PassToolsScreen(
+                    onOpenPassMeter = { navController.navigate(Screen.PassMeter.route) },
+                    onOpenPassMaker = { navController.navigate(Screen.PassMaker.route) }
+                )
+            }
             composable(Screen.PassMeter.route) {
-                PassToolsScreen(onBack = { navController.navigate(Screen.Locker.route) })
+                PassMeterScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.PassMaker.route) {
+                PassMakerScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.AddPassword.route) {
                 AddPasswordScreen(viewModel = viewModel, onBack = { navController.popBackStack() })

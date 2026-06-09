@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lockit.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PassMeterScreen(onBack: () -> Unit) {
     var password by remember { mutableStateOf("") }
@@ -35,18 +37,30 @@ fun PassMeterScreen(onBack: () -> Unit) {
         animationSpec = tween(durationMillis = 1000)
     )
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("PassMeter") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
     Column(
         modifier = Modifier
+            .padding(innerPadding)
             .padding(24.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(text = "PassMeter", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
         Text(text = stringResource(R.string.try_strength), fontSize = 14.sp)
-        
+
         Spacer(modifier = Modifier.height(48.dp))
-        
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -98,5 +112,6 @@ fun PassMeterScreen(onBack: () -> Unit) {
             },
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    }
     }
 }

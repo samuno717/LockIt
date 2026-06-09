@@ -17,7 +17,8 @@
 | 🔒 **Secure Locker** | Store and manage account credentials (service, email, username, password, website) locally |
 | 🗂️ **Custom Folders** | Create, rename and delete your own categories; file each login into a folder (persisted in Room) |
 | 🎨 **Service Icons** | Assign a monochrome brand icon to any entry via a searchable picker (imported Flaticon "Uicons" vectors) |
-| 👁️ **Blurred Reveal** | List passwords show a blurred decoy (never the real value); tap the eye to reveal, tap a revealed card for a details popup |
+| 👁️ **Blurred Reveal** | List passwords show a blurred decoy (never the real value); tap the animated eye to fade the real value in/out, tap a revealed card for a details popup |
+| 🔊 **Audio Feedback** | Optional unlock sound on login / registration — drop `unlock.mp3` into `res/raw` |
 | 🗝️ **Master Passkey** | Single master password protects access to all stored entries — stored as a PBKDF2 hash, never in clear |
 | 🔐 **Encrypted at Rest** | Saved passwords are encrypted with AES-256-GCM (key in the Android Keystore) |
 | 🛠️ **PassTools** | Password strength meter (`PassMeter`) and a generator (`PassMaker`) with guaranteed minimum digits/symbols and copy-to-clipboard |
@@ -42,8 +43,8 @@ graph TD
         B --> F[PasswordDetailsScreen]
         B --> G[AddPasswordScreen]
         B --> H[PassToolsScreen]
-        B --> I[PassMeterScreen]
-        B --> J[PassMakerScreen]
+        H --> I[PassMeterScreen]
+        H --> J[PassMakerScreen]
         B --> K[SettingsScreen]
         B --> L[AccountScreen]
         B --> M[NotificationsScreen]
@@ -55,7 +56,7 @@ graph TD
 
     subgraph Support ["UI Support"]
         R[ui/icons — AppIcons + IconPicker]
-        S[util — LocaleHelper]
+        S[util — LocaleHelper + SoundPlayer]
     end
 
     subgraph Crypto ["security"]
@@ -69,10 +70,10 @@ graph TD
         Q[LockItDao]
     end
 
-    E & F & G & H & I & J & K & L <--> N
+    E & F & G & K & L <--> N
     C & D --> N
     G & E --> R
-    K --> S
+    C & D & K --> S
     N --> T
     O --> U
     N <--> O
@@ -112,7 +113,7 @@ The app starts at **LoginScreen**, which gates access behind the master passkey.
 | `PasswordDetailsScreen` | `PasswordDetailsScreen.kt` | _(legacy — not navigated)_ | Full-screen single-entry view. Superseded by the in-list details popup; kept for reference. |
 | `PassToolsScreen` | `PassToolsScreen.kt` | Bottom nav | Hub for password tools — links to PassMeter and PassMaker. |
 | `PassMeterScreen` | `PassMeterScreen.kt` | `PassToolsScreen` | Type any password to get an instant strength score with a visual bar. |
-| `PassMakerScreen` | `PassMakerScreen.kt` | `PassToolsScreen` | Generate a password with configurable length, A-Z, a-z, 0-9, symbols, and guaranteed minimum digits/symbols. |
+| `PassMakerScreen` | `PassMakerScreen.kt` | `PassToolsScreen` | Generate a password with configurable length, A-Z, a-z, 0-9, symbols, guaranteed minimum digits/symbols, and copy-to-clipboard. |
 | `SettingsScreen` | `SettingsScreen.kt` | Bottom nav | Account, Notifications, Language, Reset passkey, Dark mode toggle, Logout. |
 | `AccountScreen` | `AccountScreen.kt` | `SettingsScreen` | View and edit user profile, change avatar image. |
 | `NotificationsScreen` | `NotificationsScreen.kt` | `SettingsScreen` | In-app security alerts and notifications. |
@@ -221,6 +222,7 @@ LockIt uses a **single shared ViewModel** — `LockItViewModel` — injected via
 | State / Function | Type | Description |
 | :--- | :--- | :--- |
 | `currentUser` | `StateFlow<User?>` | Currently logged-in user; `null` when not authenticated |
+| `isLoading` | `StateFlow<Boolean>` | `true` until the initial user lookup finishes; gates the start screen so Register never flashes before Login |
 | `searchQuery` | `StateFlow<String>` | Current text in the search bar |
 | `passwords` | `StateFlow<List<PasswordEntry>>` | Full list or filtered list — reacts to `searchQuery` via `flatMapLatest` |
 | `categories` | `StateFlow<List<String>>` | Folder names, observed from the `categories` table |
@@ -303,6 +305,17 @@ starts with `fi_` shows up in the picker, so there is no hard-coded list to main
 The chosen icon's resource name is stored in `password_entries.iconKey`. Icons are tinted to
 the theme's `onSurface` colour, so assets should be monochrome (black on transparent); a
 missing drawable simply falls back to the service's first letter.
+
+---
+
+## 🔊 Sounds
+
+An optional "unlock" sound plays on a successful **login** and on **registration**. Like
+icons, it is resolved by name at runtime, so the app runs silently if the file is absent.
+
+To enable it, drop a short clip named **`unlock`** into `app/src/main/res/raw/`
+(`unlock.mp3`, `.ogg`, `.wav`, or `.m4a` — lowercase name, no spaces). Playback is handled
+by `util/SoundPlayer.kt`.
 
 ---
 
@@ -410,12 +423,14 @@ LockIt/
 │       │   │   │       ├── Theme.kt               # MaterialTheme wrapper
 │       │   │   │       └── Type.kt                # Typography definitions
 │       │   │   ├── util/
-│       │   │   │   └── LocaleHelper.kt            # Runtime language switching (per-app locale)
+│       │   │   │   ├── LocaleHelper.kt            # Runtime language switching (per-app locale)
+│       │   │   │   └── SoundPlayer.kt             # One-shot sound effects from res/raw
 │       │   │   ├── viewmodel/
 │       │   │   │   └── LockItViewModel.kt         # Single shared ViewModel + Factory
 │       │   │   └── MainActivity.kt
 │       │   └── res/
 │       │       ├── drawable/                      # App icons + imported fi_brands_* vector icons
+│       │       ├── raw/                            # Sound effects (e.g. unlock.mp3) — optional
 │       │       ├── mipmap-*/                      # Launcher icons (all screen densities)
 │       │       ├── values/
 │       │       │   ├── colors.xml

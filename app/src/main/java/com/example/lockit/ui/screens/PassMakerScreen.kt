@@ -2,6 +2,7 @@ package com.example.lockit.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Refresh
@@ -13,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lockit.R
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PassMakerScreen(onBack: () -> Unit) {
     var length by remember { mutableStateOf(12f) }
@@ -79,16 +80,26 @@ fun PassMakerScreen(onBack: () -> Unit) {
         generate()
     }
 
-    Box {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("PassMaker") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .padding(24.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "PassMaker", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(32.dp))
-
             OutlinedTextField(
                 value = generatedPassword,
                 onValueChange = {},
@@ -138,11 +149,6 @@ fun PassMakerScreen(onBack: () -> Unit) {
             CounterRow(stringResource(R.string.min_numbers), minNumbers) { minNumbers = it.coerceIn(0, length.toInt()) }
             CounterRow(stringResource(R.string.min_symbols), minSymbols) { minSymbols = it.coerceIn(0, length.toInt()) }
         }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
     }
 }
 

@@ -1,7 +1,11 @@
 package com.example.lockit.ui.screens
 
 import android.os.Build
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -16,14 +20,15 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -366,9 +371,46 @@ fun PasswordItem(password: PasswordEntry, onDelete: () -> Unit) {
             }
 
             IconButton(onClick = { revealed = !revealed }) {
-                Icon(
-                    imageVector = if (revealed) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                EyeToggleIcon(
+                    revealed = revealed,
                     contentDescription = stringResource(if (revealed) R.string.hide_password else R.string.reveal_password)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EyeToggleIcon(revealed: Boolean, contentDescription: String?) {
+    // Animate the strike-through: 0 = no slash (revealed), 1 = full slash (hidden).
+    val slash by animateFloatAsState(
+        targetValue = if (revealed) 0f else 1f,
+        animationSpec = tween(durationMillis = 250),
+        label = "eyeSlash"
+    )
+    val lineColor = LocalContentColor.current
+
+    Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+        Icon(
+            imageVector = Icons.Default.Visibility,
+            contentDescription = contentDescription,
+            modifier = Modifier.matchParentSize()
+        )
+        if (slash > 0.01f) {
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val pad = size.minDimension * 0.14f
+                val start = Offset(pad, size.height - pad)         // bottom-left
+                val fullEnd = Offset(size.width - pad, pad)        // top-right
+                val end = Offset(
+                    start.x + (fullEnd.x - start.x) * slash,
+                    start.y + (fullEnd.y - start.y) * slash
+                )
+                drawLine(
+                    color = lineColor,
+                    start = start,
+                    end = end,
+                    strokeWidth = size.minDimension * 0.09f,
+                    cap = StrokeCap.Round
                 )
             }
         }
@@ -387,31 +429,52 @@ private fun decoyFor(password: String): String {
 
 @Composable
 private fun RevealablePassword(password: String, revealed: Boolean) {
-    if (revealed) {
-        Text(text = password, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-        return
-    }
-
     val decoy = remember(password) { decoyFor(password) }
 
     // Modifier.blur only renders on Android 12+ (API 31). On older devices fall back to
     // dots rather than showing the decoy letters un-blurred.
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    if (canBlur) {
-        // Unbounded edge treatment lets the blur fade out softly instead of being clipped
-        // into a hard rectangle — no background needed, matching the mock-up.
-        Text(
-            text = decoy,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            softWrap = false,
-            modifier = Modifier
-                .padding(vertical = 4.dp)
-                .blur(9.dp, BlurredEdgeTreatment.Unbounded)
-        )
-    } else {
-        Text(text = "•".repeat(decoy.length), fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+
+    // Crossfade gives a short, smooth fade between blurred decoy and the real value. Both
+    // states fill the full width and centre their text, so the value stays put (no left
+    // shift) and the tile never resizes while toggling. The real password is only composed
+    // while it is actually being revealed.
+    Crossfade(
+        targetState = revealed,
+        animationSpec = tween(durationMillis = 220),
+        label = "passwordReveal",
+        modifier = Modifier.fillMaxWidth()
+    ) { isRevealed ->
+        when {
+            isRevealed -> Text(
+                text = password,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            canBlur -> Text(
+                text = decoy,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .blur(9.dp, BlurredEdgeTreatment.Unbounded)
+            )
+            else -> Text(
+                text = "•".repeat(decoy.length),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
