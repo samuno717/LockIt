@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lockit.R
+import com.example.lockit.util.SoundPlayer
 import com.example.lockit.viewmodel.LockItViewModel
 
 @Composable
@@ -26,9 +28,9 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit
 ) {
     var passkey by remember { mutableStateOf("") }
-    val user by viewModel.currentUser.collectAsState()
     var showError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -54,7 +56,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = passkey,
             onValueChange = { passkey = it; showError = false },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             isError = showError,
@@ -69,14 +71,15 @@ fun LoginScreen(
         )
         
         if (showError) {
-            Text(text = "Invalid passkey", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Text(text = stringResource(R.string.invalid_passkey), color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
         
         Spacer(modifier = Modifier.height(32.dp))
         
         Button(
             onClick = {
-                if (user?.passkey == passkey) {
+                if (viewModel.verifyPasskey(passkey)) {
+                    SoundPlayer.playRaw(context, "unlock")
                     onLoginSuccess()
                 } else {
                     showError = true
@@ -91,7 +94,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Reminder: Keep Yourself Secure",
+            text = stringResource(R.string.login_reminder),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -102,7 +105,7 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Don't have a passkey? Create one")
+            Text(stringResource(R.string.no_passkey_create))
         }
     }
 }

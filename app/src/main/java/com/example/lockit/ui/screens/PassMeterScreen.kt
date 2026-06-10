@@ -4,16 +4,20 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lockit.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PassMeterScreen(onBack: () -> Unit) {
     var password by remember { mutableStateOf("") }
@@ -33,22 +37,34 @@ fun PassMeterScreen(onBack: () -> Unit) {
         animationSpec = tween(durationMillis = 1000)
     )
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("PassMeter") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
     Column(
         modifier = Modifier
+            .padding(innerPadding)
             .padding(24.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(text = "PassMeter", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(text = "Try you strength!", fontSize = 14.sp)
-        
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = stringResource(R.string.try_strength), fontSize = 14.sp)
+
         Spacer(modifier = Modifier.height(48.dp))
-        
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            placeholder = { Text("Type your password here...") },
+            placeholder = { Text(stringResource(R.string.type_password_here)) },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = { Icon(Icons.Default.Lock, null) },
             shape = MaterialTheme.shapes.extraLarge,
@@ -62,13 +78,13 @@ fun PassMeterScreen(onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(32.dp))
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Password strength:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = stringResource(R.string.password_strength), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             if (password.isNotEmpty()) {
                 Text(
                     text = when {
-                        strength < 0.3f -> "Weak"
-                        strength < 0.7f -> "Medium"
-                        else -> "Strong"
+                        strength < 0.3f -> stringResource(R.string.strength_weak)
+                        strength < 0.7f -> stringResource(R.string.strength_medium)
+                        else -> stringResource(R.string.strength_strong)
                     },
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -96,5 +112,6 @@ fun PassMeterScreen(onBack: () -> Unit) {
             },
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.lockit.R
+import com.example.lockit.util.LocaleHelper
 import com.example.lockit.viewmodel.LockItViewModel
 import java.util.*
 
@@ -29,7 +30,6 @@ import java.util.*
 fun SettingsScreen(
     viewModel: LockItViewModel,
     onNavigateToAccount: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
     onNavigateToVideo: () -> Unit,
     onNavigateToAudio: () -> Unit,
     onLogout: () -> Unit
@@ -87,20 +87,36 @@ fun SettingsScreen(
     }
 
     if (showLanguageDialog) {
+        val context = LocalContext.current
+        val currentLang = remember { LocaleHelper.getLanguage(context).ifBlank { "en" } }
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
             title = { Text(stringResource(R.string.language)) },
             text = {
                 Column {
-                    TextButton(onClick = { 
-                        showLanguageDialog = false 
-                    }) { Text("English") }
-                    TextButton(onClick = { 
-                        showLanguageDialog = false 
-                    }) { Text("Polski") }
+                    LanguageOption(
+                        label = "English",
+                        selected = currentLang == "en",
+                        onClick = {
+                            showLanguageDialog = false
+                            LocaleHelper.setLanguage(context, "en")
+                        }
+                    )
+                    LanguageOption(
+                        label = "Polski",
+                        selected = currentLang == "pl",
+                        onClick = {
+                            showLanguageDialog = false
+                            LocaleHelper.setLanguage(context, "pl")
+                        }
+                    )
                 }
             },
-            confirmButton = {}
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 
@@ -110,7 +126,7 @@ fun SettingsScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Manage your LOCKIT.", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(text = stringResource(R.string.manage_lockit), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         
         Spacer(modifier = Modifier.height(24.dp))
         
@@ -148,16 +164,15 @@ fun SettingsScreen(
         }
         
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = user?.username ?: "Linux Enjoyer", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(text = user?.username ?: stringResource(R.string.default_username), fontWeight = FontWeight.Bold, fontSize = 18.sp)
         
         Spacer(modifier = Modifier.height(32.dp))
         
         LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item { SettingItem(stringResource(R.string.account), onNavigateToAccount) }
-            item { SettingItem(stringResource(R.string.notifications), onNavigateToNotifications) }
             item { SettingItem(stringResource(R.string.language), { showLanguageDialog = true }) }
             item { SettingItem(stringResource(R.string.reset_master_key), { showResetDialog = true }) }
-            item { SettingItem("App Tutorial", onNavigateToVideo) }
+            item { SettingItem(stringResource(R.string.app_tutorial), onNavigateToVideo) }
             item { 
                 Row(
                     modifier = Modifier.fillMaxWidth().clickable { viewModel.toggleDarkMode(!isDarkMode) }.padding(vertical = 12.dp),
@@ -176,6 +191,32 @@ fun SettingsScreen(
                 }
             }
             item { SettingItem(stringResource(R.string.logout), { showLogoutDialog = true }) }
+        }
+    }
+}
+
+@Composable
+private fun LanguageOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+        )
+        if (selected) {
+            Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

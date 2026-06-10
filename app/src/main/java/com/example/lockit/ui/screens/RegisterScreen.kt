@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lockit.R
+import com.example.lockit.util.SoundPlayer
 import com.example.lockit.viewmodel.LockItViewModel
 
 @Composable
@@ -30,6 +32,7 @@ fun RegisterScreen(
     var showError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -55,7 +58,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            placeholder = { Text("Username") },
+            placeholder = { Text(stringResource(R.string.username)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -66,7 +69,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = passkey,
             onValueChange = { passkey = it; showError = false },
-            placeholder = { Text("Password") },
+            placeholder = { Text(stringResource(R.string.password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -84,7 +87,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = confirmPasskey,
             onValueChange = { confirmPasskey = it; showError = false },
-            placeholder = { Text("Repeat Password") },
+            placeholder = { Text(stringResource(R.string.repeat_password)) },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             isError = showError,
@@ -99,7 +102,7 @@ fun RegisterScreen(
         )
         
         if (showError) {
-            Text(text = "Passkeys do not match", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            Text(text = stringResource(R.string.passkeys_no_match), color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
         
         Spacer(modifier = Modifier.height(32.dp))
@@ -108,6 +111,7 @@ fun RegisterScreen(
             onClick = {
                 if (username.isNotEmpty() && passkey.isNotEmpty() && passkey == confirmPasskey) {
                     viewModel.registerUser(username, passkey)
+                    SoundPlayer.playRaw(context, "unlock")
                     onRegisterSuccess()
                 } else {
                     showError = true
@@ -117,7 +121,7 @@ fun RegisterScreen(
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
         ) {
-            Text(stringResource(R.string.login), color = MaterialTheme.colorScheme.surface)
+            Text(stringResource(R.string.register), color = MaterialTheme.colorScheme.surface)
         }
     }
 }

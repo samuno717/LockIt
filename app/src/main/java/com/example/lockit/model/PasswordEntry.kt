@@ -12,5 +12,6 @@ data class PasswordEntry(
     val password: String,
     val website: String,
     val category: String,
-    val iconRes: Int
+    val iconRes: Int = 0,
+    val iconKey: String = ""
 )

@@ -1,4 +1,4 @@
-# 🔐 LockIt — Password Manager
+# 🔐 LockIt — Menedżer haseł
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](#)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white)](#)
@@ -6,31 +6,37 @@
 [![Room](https://img.shields.io/badge/Database-Room_SQLite-003B57?logo=sqlite&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#)
 
-**LockIt** is a modern, offline-first password manager for Android. All credentials are stored locally on the device — no internet connection, no cloud, no risk. Built with Jetpack Compose, Room, and a clean MVVM architecture.
+**LockIt** - menedżer haseł dla systemu Android działający w trybie offline. Wszystkie dane uwierzytelniające są przechowywane lokalnie na urządzeniu — bez połączenia z Internetem i bez chmury. Aplikacja została zbudowana przy użyciu Jetpack Compose, biblioteki Room oraz architektury MVVM.
 
 ---
 
-## ✨ Features
+## Funkcje
 
-| Feature | Description |
-| :--- | :--- |
-| 🔒 **Secure Locker** | Store and manage account credentials (service, email, username, password, website) locally |
-| 🗝️ **Master Passkey** | Single master password protects access to all stored entries |
-| 🛠️ **PassTools** | Built-in password strength meter (`PassMeter`) and customizable password generator (`Generator`) |
-| 🌓 **Dynamic UI** | Full Light and Dark mode support, toggled from Settings |
-| 📴 **Privacy First** | 100% on-device storage — no network calls, no data sharing |
-| 🌐 **Multilingual** | Interface available in English and Polish (`values/` + `values-pl/`) |
-| 🔍 **Live Search** | Real-time filtering of vault entries by service name using `Flow` |
+| Funkcja | Opis                                                                                                                              |
+| :--- |:----------------------------------------------------------------------------------------------------------------------------------|
+| **Bezpieczny Sejf** | Przechowywanie i zarządzanie danymi kont (serwis, e-mail, nazwa użytkownika, hasło, strona internetowa) lokalnie                  |
+| **Własne foldery** | Tworzenie, zmiana nazw i usuwanie własnych kategorii; przypisywanie wpisów do folderów (trwale zapisane w Room)                   |
+| **Ikony serwisów** | Przypisywanie monochromatycznych ikon marek do dowolnego wpisu poprzez wyszukiwarkę (importowane wektory "Uicons" z Flaticon)     |
+| **Zamaskowane hasła** | Hasła na liście są domyślnie zasłonięte; animowany przełącznik pozwala na ich odsłonięcie, a kliknięcie w kartę otwiera szczegóły |
+| **Kopiowanie do schowka** | Każdy wpis posiada przycisk szybkiego kopiowania hasła do schowka telefonu                                                        |
+| **Informacja dźwiękowa** | Dźwięk odblokowania przy logowaniu / rejestracji                                                                                  |
+| **Klucz główny** | Pojedyncze hasło główne chroni dostęp do wszystkich zapisanych wpisów — przechowywane jako hash PBKDF2                            |
+| **Szyfrowanie danych** | Zapisane hasła są szyfrowane algorytmem AES-256-GCM (klucz przechowywany w Android Keystore)                                      |
+| **Narzędzia haseł** | Miernik siły hasła (`PassMeter`) oraz generator (`PassMaker`) z gwarantowaną minimalną liczbą cyfr/symboli                        |
+| **Dynamiczny interfejs** | Pełna obsługa trybu jasnego i ciemnego, przełączana w ustawieniach                                                                |
+| **Prywatność przede wszystkim** | Przechowywanie danych w 100% na urządzeniu — brak zapytań sieciowych, brak udostępniania danych                                   |
+| **Wielojęzyczność** | Obsługa języka angielskiego i polskiego, przełączalna w czasie rzeczywistym w ustawieniach                                        |
+| **Wyszukiwanie na żywo** | Wyszukiwanie w czasie rzeczywistym we wszystkich folderach według nazwy serwisu przy użyciu `Flow`                                |
 
 ---
 
-## 🏗️ System Architecture
+## Architektura systemu
 
-LockIt follows **Clean Architecture** principles using the **MVVM (Model-View-ViewModel)** pattern. This provides a strict separation between UI, business logic, and data persistence.
+LockIt przestrzega zasad **Clean Architecture** przy użyciu wzorca **MVVM (Model-View-ViewModel)**.
 
 ```mermaid
 graph TD
-    subgraph UI_Layer ["UI Layer — Jetpack Compose"]
+    subgraph UI_Layer ["Warstwa UI — Jetpack Compose"]
         A[MainActivity] --> B[Navigation Graph\nScreen.kt]
         B --> C[LoginScreen]
         B --> D[RegisterScreen]
@@ -38,170 +44,208 @@ graph TD
         B --> F[PasswordDetailsScreen]
         B --> G[AddPasswordScreen]
         B --> H[PassToolsScreen]
-        B --> I[PassMeterScreen]
-        B --> J[GeneratorScreen]
+        H --> I[PassMeterScreen]
+        H --> J[PassMakerScreen]
         B --> K[SettingsScreen]
         B --> L[AccountScreen]
-        B --> M[NotificationsScreen]
     end
 
-    subgraph Logic_Layer ["State Management"]
+    subgraph Logic_Layer ["Zarządzanie stanem"]
         N[LockItViewModel]
     end
 
-    subgraph Data_Layer ["Data Layer — Room SQLite"]
+    subgraph Support ["Wsparcie UI"]
+        R[ui/icons — AppIcons + IconPicker]
+        S[util — LocaleHelper + SoundPlayer]
+    end
+
+    subgraph Crypto ["Bezpieczeństwo"]
+        T[PasswordHasher — PBKDF2]
+        U[CryptoManager — AES-GCM / Keystore]
+    end
+
+    subgraph Data_Layer ["Warstwa danych — Room SQLite"]
         O[LockItRepository]
-        P[LockItDatabase]
+        P[LockItDatabase\nUser + PasswordEntry + Category]
         Q[LockItDao]
     end
 
-    E & F & G & H & I & J & K & L <--> N
+    E & F & G & K & L <--> N
     C & D --> N
+    G & E --> R
+    C & D & K --> S
+    N --> T
+    O --> U
     N <--> O
     O <--> Q
     Q <--> P
 ```
 
-### Architectural pillars
+> **Uwaga:** `PasswordDetailsScreen` nadal istnieje jako trasa pełnoekranowa, ale nie jest już osiągalna z poziomu UI — szczegóły wpisu są teraz wyświetlane za pomocą okna popup bezpośrednio w `LockerScreen`.
 
-- **Single ViewModel** — `LockItViewModel` manages state for all screens, avoiding redundant repository calls
-- **Reactive Streams** — `Kotlin Flow` and `StateFlow` for real-time UI updates; live search via `flatMapLatest`
-- **Single Source of Truth** — Room database is the only source of data; UI only observes state
-- **Declarative UI** — 100% Jetpack Compose, no XML layouts
-- **Singleton DB** — `LockItDatabase` uses a thread-safe `@Volatile` singleton pattern
+### Filary architektoniczne
+
+- **Pojedynczy ViewModel** — `LockItViewModel` zarządza stanem dla wszystkich ekranów, unikając nadmiarowych wywołań repozytorium.
+- **Strumienie reaktywne** — `Kotlin Flow` i `StateFlow` dla aktualizacji UI w czasie rzeczywistym; wyszukiwanie na żywo przez `flatMapLatest`.
+- **Jedno źródło prawdy** — baza danych Room jest jedynym źródłem danych; UI jedynie obserwuje stan.
+- **Deklaratywne UI** — 100% Jetpack Compose, brak układów XML.
+- **Singleton bazy danych** — `LockItDatabase` używa bezpiecznego wątkowo wzorca singleton z adnotacją `@Volatile`.
 
 ---
 
-## 🗺️ Navigation Map
+## Mapa nawigacji
 
-The app starts at **LoginScreen**, which gates access behind the master passkey. After authentication the user lands on **LockerScreen** — the central vault hub. From there, a bottom navigation bar gives access to **PassToolsScreen** and **SettingsScreen** at all times.
+Aplikacja uruchamia się na ekranie **LoginScreen**, który blokuje dostęp za pomocą klucza głównego. Po uwierzytelnieniu użytkownik trafia do **LockerScreen** — centralnego skarbca. Stamtąd pasek nawigacyjny na dole umożliwia stały dostęp do ekranów **PassToolsScreen** i **SettingsScreen**.
 
 <p align="center">
-  <img src="docs/navmap.jpg" alt="LockIt Navigation Map" width="900">
+  <img src="docs/navmap.jpg" alt="Mapa nawigacji LockIt" width="900">
 </p>
 
-### Screen overview
+### Przegląd ekranów
 
-| Screen | File | Accessed from | Description |
+| Ekran | Plik | Dostęp z | Opis |
 | :--- | :--- | :--- | :--- |
-| `LoginScreen` | `LoginScreen.kt` | App launch | Prompts for master passkey; entry point on every launch. |
-| `RegisterScreen` | `RegisterScreen.kt` | `LoginScreen` | First-launch setup — choose username and create master passkey. |
-| `LockerScreen` | `LockerScreen.kt` | `LoginScreen` (after auth) | Main vault — categorised list of all entries, live search bar, FAB to add. |
-| `PasswordDetailsScreen` | `PasswordDetailsScreen.kt` | `LockerScreen` (eye icon) | Full view of a single entry — shows email, password, website. |
-| `AddPasswordScreen` | `AddPasswordScreen.kt` | `LockerScreen` (+ FAB) | Form to save a new credential (service, email, username, password, website, category). |
-| `PassToolsScreen` | `PassToolsScreen.kt` | Bottom nav | Hub for password tools — links to PassMeter and Generator. |
-| `PassMeterScreen` | `PassMeterScreen.kt` | `PassToolsScreen` | Type any password to get an instant strength score with a visual bar. |
-| `GeneratorScreen` | `GeneratorScreen.kt` | `PassToolsScreen` | Generate a password with configurable length, A-Z, a-z, 0-9, symbols. |
-| `SettingsScreen` | `SettingsScreen.kt` | Bottom nav | Account, Notifications, Language, Reset passkey, Dark mode toggle, Logout. |
-| `AccountScreen` | `AccountScreen.kt` | `SettingsScreen` | View and edit user profile, change avatar image. |
-| `NotificationsScreen` | `NotificationsScreen.kt` | `SettingsScreen` | In-app security alerts and notifications. |
-| `AudioPlayerScreen` | `AudioPlayerScreen.kt` | Internal | Audio playback (Media3 / ExoPlayer). |
-| `VideoPlayerScreen` | `VideoPlayerScreen.kt` | Internal | Video playback with hardware acceleration. |
+| `LoginScreen` | `LoginScreen.kt` | Uruchomienie aplikacji | Prośba o klucz główny; punkt wejścia przy każdym uruchomieniu. |
+| `RegisterScreen` | `RegisterScreen.kt` | `LoginScreen` | Konfiguracja przy pierwszym uruchomieniu — wybór nazwy użytkownika i utworzenie klucza głównego. |
+| `LockerScreen` | `LockerScreen.kt` | `LoginScreen` (po uwierzytelnieniu) | Główny skarbiec — kategorie (tworzenie / zmiana nazwy / usuwanie), wyszukiwanie, zamaskowane hasła, przycisk kopiowania, popup ze szczegółami, przycisk dodawania. |
+| `AddPasswordScreen` | `AddPasswordScreen.kt` | `LockerScreen` (przycisk +) | Formularz zapisu nowego wpisu — strona, e-mail, hasło, folder docelowy i wyszukiwarka ikon. |
+| `PasswordDetailsScreen` | `PasswordDetailsScreen.kt` | _(legacy — brak nawigacji)_ | Widok szczegółów pojedynczego wpisu. Zastąpiony przez okno popup; zachowany jako odniesienie. |
+| `PassToolsScreen` | `PassToolsScreen.kt` | Pasek dolny | Centrum narzędzi haseł — odnośniki do PassMeter i PassMaker. |
+| `PassMeterScreen` | `PassMeterScreen.kt` | `PassToolsScreen` | Miernik siły hasła z wizualnym wskaźnikiem. |
+| `PassMakerScreen` | `PassMakerScreen.kt` | `PassToolsScreen` | Generator haseł z konfiguracją długości, znaków i kopiowaniem do schowka. |
+| `SettingsScreen` | `SettingsScreen.kt` | Pasek dolny | Konto, Język, Resetowanie klucza, Tryb ciemny, Wylogowanie. |
+| `AccountScreen` | `AccountScreen.kt` | `SettingsScreen` | Podgląd i edycja profilu użytkownika, zmiana zdjęcia profilowego. |
+| `AudioPlayerScreen` | `AudioPlayerScreen.kt` | Wewnętrzne | Odtwarzanie dźwięku (Media3 / ExoPlayer). |
+| `VideoPlayerScreen` | `VideoPlayerScreen.kt` | Wewnętrzne | Odtwarzanie wideo z akceleracją sprzętową. |
 
 ---
 
-## 🎨 Mock-ups
+## Ekrany
 
 <p align="center">
-  <img src="docs/mockup-login.png" alt="Login Screen" width="220"/>
+  <img src="docs/mockup-login.png" alt="Ekran logowania" width="220"/>
   &nbsp;&nbsp;
-  <img src="docs/mockup-locker.png" alt="Locker Screen" width="220"/>
+  <img src="docs/mockup-locker.png" alt="Ekran sejfu" width="220"/>
   &nbsp;&nbsp;
-  <img src="docs/mockup-details.png" alt="Password Details" width="220"/>
+  <img src="docs/mockup-details.png" alt="Szczegóły hasła" width="220"/>
 </p>
 
 <p align="center">
-  <img src="docs/mockup-add.png" alt="Add Password" width="220"/>
+  <img src="docs/mockup-add.png" alt="Dodawanie hasła" width="220"/>
   &nbsp;&nbsp;
-  <img src="docs/mockup-passtools.png" alt="PassTools" width="220"/>
+  <img src="docs/mockup-passtools.png" alt="Narzędzia haseł" width="220"/>
   &nbsp;&nbsp;
-  <img src="docs/mockup-settings.png" alt="Settings" width="220"/>
+  <img src="docs/mockup-settings.png" alt="Ustawienia" width="220"/>
 </p>
 
 ---
 
-## 📊 Database Architecture
+## Architektura bazy danych
 
-LockIt uses the **Room Persistence Library** (SQLite abstraction). The database is named `lockit_database`, version `1`, and contains two entities: `password_entries` and `users`.
+Aplikacja LockIt wykorzystuje bibliotekę Room Persistence Library (warstwę abstrakcji dla SQLite). Baza danych nosi nazwę lockit_database, jest w wersji 1 i zawiera dwie encje: password_entries oraz users.
 
-### Entity Relationship Diagram
+### Diagram relacji encji
 
 ```mermaid
 erDiagram
     users {
-        Int id PK "Always 1 — singleton row"
-        String username "Display name, default: User"
-        String passkey "Master password (plain — see Security note)"
-        String profileImage "URI to avatar image, nullable"
-        Long createdAt "Account creation timestamp"
-        Long lastLogin "Timestamp of last successful login"
+        Int id PK "Zawsze 1 — pojedynczy wiersz (singleton)"
+        String username "Wyświetlana nazwa, domyślnie: User"
+        String passkey "Hasło główne (Master passkey) — hash PBKDF2 + sól (salt)"
+        String profileImage "URI do obrazu awatara, dopuszcza wartość null (nullable)"
+        Long createdAt "Znacznik czasu (timestamp) utworzenia konta"
+        Long lastLogin "Znacznik czasu ostatniego udanego logowania"
     }
 
     password_entries {
-        Long id PK "Auto-increment"
-        String serviceName "Name of the service, e.g. Facebook"
-        String email "Account email address"
-        String username "Account username / login"
-        String password "Account password"
-        String website "Associated website URL"
-        String category "Category tag: Vault, Games, Social Media, etc."
-        Int iconRes "Resource ID of the service icon"
+        Long id PK "Autoinkrementacja"
+        String serviceName "Nazwa serwisu, np. Facebook"
+        String email "Adres e-mail konta"
+        String username "Nazwa użytkownika / login do konta"
+        String password "Hasło do konta — zaszyfrowane w spoczynku (encrypted at rest) algorytmem AES-GCM"
+        String website "Powiązany adres URL witryny"
+        String category "Nazwa folderu, do którego należy ten wpis"
+        Int iconRes "Pole przestarzałe (legacy), nieużywane (domyślnie 0)"
+        String iconKey "Nazwa zasobu rysowalnego (Drawable resource) wybranej ikony, np. fi_brands_steam"
     }
 
-    users ||--o{ password_entries : "owns"
+    categories {
+        Long id PK "Autoinkrementacja"
+        String name "Nazwa folderu (unikalna). Wstępnie wypełniona (seeded) wartościami: Vault, Games, Social Media, Work"
+    }
+
+    users ||--o{ password_entries : "posiada/jest właścicielem"
 ```
 
-### Data Schema — `password_entries`
+### Schemat danych — `password_entries`
 
-| Field | Type | Constraint | Purpose |
+| Pole          | Typ      | Ograniczenie                | Cel                                                                                                                        |
+|:--------------|:---------|:----------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| `id`          | `Long`   | `PRIMARY KEY, autoGenerate` | Unikalny identyfikator wiersza                                                                                             |
+| `serviceName` | `String` | `NOT NULL`                  | Nazwa serwisu (używana również do wyszukiwania w czasie rzeczywistym / live search)                                        |
+| `email`       | `String` | `NOT NULL`                  | Adres e-mail powiązany z kontem                                                                                          |
+| `username`    | `String` | `NOT NULL`                  | Nazwa użytkownika / login do konta                                                                                           |
+| `password`    | `String` | `NOT NULL`                  | Hasło do konta — przechowywane w postaci zaszyfrowanej algorytmem AES-256-GCM (klucz kryptograficzny znajduje się w Android Keystore)                                                  |
+| `website`     | `String` | `NOT NULL`                  | Adres URL witryny dla danego serwisu                                                                                                |
+| `category`    | `String` | `NOT NULL`                  | Folder, do którego przypisany jest ten wpis (musi pasować do wartości w categories.name)                                                             |
+| `iconRes`     | `Int`    | `NOT NULL`                  | Pole przestarzałe (legacy), nieużywane — zachowane w celu zapewnienia kompatybilności schematu (domyślnie 0)                                                         |
+| `iconKey`     | `String` | `NOT NULL, DEFAULT ''`      | Nazwa zasobu rysowalnego (Drawable) dla wybranej ikony (np. fi_brands_steam); pusty string '' oznacza awatar literowy                                   |
+
+### Schemat danych — `categories`
+
+| Pole | Typ | Ograniczenie | Cel |
 | :--- | :--- | :--- | :--- |
-| `id` | `Long` | `PRIMARY KEY, autoGenerate` | Unique row identifier |
-| `serviceName` | `String` | `NOT NULL` | Name of the service (also used for live search) |
-| `email` | `String` | `NOT NULL` | Email associated with the account |
-| `username` | `String` | `NOT NULL` | Username / login for the account |
-| `password` | `String` | `NOT NULL` | Account password |
-| `website` | `String` | `NOT NULL` | Website URL for the service |
-| `category` | `String` | `NOT NULL` | Category for tab-based filtering (e.g. Social Media) |
-| `iconRes` | `Int` | `NOT NULL` | Drawable resource ID of the service icon |
+| `id` | `Long` | `PRIMARY KEY, autoGenerate` | Unikalny identyfikator wiersza |
+| `name` | `String` | `NOT NULL, UNIQUE` | Nazwa folderu; domyślne wartości Vault, Games, Social Media, Work są wprowadzane do bazy (seeded) przy pierwszym uruchomieniu aplikacji |
 
-### Data Schema — `users`
+### Schemat danych — `users`
 
-| Field | Type | Constraint | Purpose |
+| Pole | Typ | Ograniczenie | Cel |
 | :--- | :--- |:--- | :--- |
-| `id` | `Int` | `PRIMARY KEY` | Always `1` — only one user row ever exists |
-| `username` | `String` | `DEFAULT "User"` | Display name shown on the Settings screen |
-| `passkey` | `String` | `NOT NULL` | Master passkey used to authenticate |
-| `profileImage` | `String?` | `NULLABLE` | URI string pointing to the chosen avatar image |
-| `createdAt` | `Long` | `NOT NULL` | Timestamp when the account was first created |
-| `lastLogin` | `Long` | `NOT NULL` | Timestamp updated on every successful login |
+| `id` | `Int` | `PRIMARY KEY` | Zawsze 1 — w tabeli zawsze istnieje tylko jeden wiersz użytkownika |
+| `username` | `String` | `DEFAULT "User"` | Nazwa wyświetlana (Display name) widoczna na ekranie Ustawień |
+| `passkey` | `String` | `NOT NULL` | Hash PBKDF2 + sól (salt) dla głównego hasła (zaczyna się od pbkdf2$...) — nigdy nie jest przechowywane jawnym tekstem (plaintext) |
+| `profileImage` | `String?` | `NULLABLE` | Ciąg znaków URI wskazujący na wybrany obraz awatara |
+| `createdAt` | `Long` | `NOT NULL` | Znacznik czasu (timestamp) momentu pierwszego utworzenia konta |
+| `lastLogin` | `Long` | `NOT NULL` | Znacznik czasu aktualizowany przy każdym udanym logowaniu |
 
 ---
 
-## 🧠 ViewModel & Data Flow
+## 🧠 ViewModel i Przepływ Danych
 
-LockIt uses a **single shared ViewModel** — `LockItViewModel` — injected via a custom `ViewModelProvider.Factory` that builds the dependency chain (`Database → DAO → Repository → ViewModel`) without a DI framework.
+LockIt wykorzystuje **jeden współdzielony ViewModel** — `LockItViewModel` — wstrzykiwany za pomocą niestandardowej klasy `ViewModelProvider.Factory`, która buduje łańcuch zależności (`Baza danych → DAO → Repozytorium → ViewModel`) bez użycia frameworka DI (Dependency Injection).
 
-### `LockItViewModel` — State & Functions
+### `LockItViewModel` — Stan i Funkcje (State & Functions)
 
-| State / Function | Type | Description |
-| :--- | :--- | :--- |
-| `currentUser` | `StateFlow<User?>` | Currently logged-in user; `null` when not authenticated |
-| `searchQuery` | `StateFlow<String>` | Current text in the search bar |
-| `passwords` | `StateFlow<List<PasswordEntry>>` | Full list or filtered list — reacts to `searchQuery` via `flatMapLatest` |
-| `isDarkMode` | `StateFlow<Boolean>` | Current theme state; toggled from SettingsScreen |
-| `loadUser()` | `private suspend` | Called on `init`; loads user from DB and updates `lastLogin` |
-| `registerUser(username, passkey)` | `suspend` | Creates a new `User` row and sets `currentUser` |
-| `updateProfileImage(uri)` | `suspend` | Updates the user's avatar URI in DB and state |
-| `addPassword(entry)` | `suspend` | Inserts a new `PasswordEntry` via repository |
-| `deletePassword(entry)` | `suspend` | Deletes a `PasswordEntry` via repository |
-| `updateSearchQuery(query)` | — | Updates `searchQuery`, which triggers `flatMapLatest` to requery |
-| `toggleDarkMode(enabled)` | — | Flips `isDarkMode` state |
-| `resetMasterKey()` | `suspend` | Clears `currentUser` to force re-authentication |
+| Stan / Funkcja | Typ | Opis                                                                                                                                                       |
+| :--- | :--- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `currentUser` | `StateFlow<User?>` | Aktualnie zalogowany użytkownik; `null` gdy nie jest uwierzytelniony                                                                                       |
+| `isLoading` | `StateFlow<Boolean>` | `true` dopóki początkowe wyszukiwanie użytkownika się nie zakończy; blokuje ekran startowy, aby ekran Rejestracji nigdy nie mignął przed ekranem Logowania |
+| `searchQuery` | `StateFlow<String>` | Aktualny tekst w pasku wyszukiwania                                                                                                                        |
+| `passwords` | `StateFlow<List<PasswordEntry>>` | Pełna lub przefiltrowana lista — reaguje na `searchQuery` za pomocą operatora `flatMapLatest`                                                              |
+| `categories` | `StateFlow<List<String>>` | Nazwy folderów, obserwowane z tabeli `categories`                                                                                                          |
+| `isDarkMode` | `StateFlow<Boolean>` | Aktualny stan motywu; przełączany z poziomu SettingsScreen                                                                                                 |
+| `loadUser()` | `private suspend` | Wywoływana w bloku `init`; ładuje użytkownika, aktualizuje `lastLogin` i ponownie szyfruje wszelkie przestarzałe wpisy zapisane jawnym tekstem (plaintext) |
+| `registerUser(username, passkey)` | `suspend` | Tworzy nowy wiersz `User` z **zahashowanym** hasłem głównym i ustawia `currentUser`                                                                        |
+| `verifyPasskey(input)` | `Boolean` | Weryfikuje wprowadzone hasło główne z zapisanym hashem; przy pierwszym udanym logowaniu w tle aktualizuje przestarzałe hasło zapisane jawnym tekstem       |
+| `updateProfileImage(uri)` | `suspend` | Aktualizuje URI awatara użytkownika w bazie danych i stanie (state)                                                                                        |
+| `addPassword(entry)` | `suspend` | Wstawia nowy wpis `PasswordEntry` (hasło jest szyfrowane w repozytorium)                                                                                   |
+| `deletePassword(entry)` | `suspend` | Usuwa wpis `PasswordEntry` za pośrednictwem repozytorium                                                                                                   |
+| `addCategory(name)` | `suspend` | Tworzy nowy folder                                                                                                                                         |
+| `renameCategory(old, new)` | `suspend` | Zmienia nazwę folderu i przenosi jego wpisy (scala foldery, jeśli docelowy już istnieje)                                                                   |
+| `deleteCategory(name)` | `suspend` | Usuwa folder oraz znajdujące się w nim hasła                                                                                                               |
+| `getPasswordCount(name, onResult)` | — | Asynchronicznie zlicza wpisy w folderze (używane przez potwierdzenie usunięcia)                                                                            |
+| `updateSearchQuery(query)` | — | Aktualizuje `searchQuery`, co wyzwala `flatMapLatest` do ponownego zapytania do bazy                                                                       |
+| `toggleDarkMode(enabled)` | — | Przełącza stan `isDarkMode`                                                                                                                                |
+| `resetMasterKey()` | `suspend` | Czyści zmienną `currentUser`, aby wymusić ponowne uwierzytelnienie                                                                                         |
 
-### Data flow — password list with live search
+> Kiedy pole wyszukiwania jest **puste**, ekran `LockerScreen` dodatkowo ogranicza listę do wybranego folderu. 
+> Gdy tylko użytkownik zacznie pisać, ten filtr folderu zostaje usunięty, więc wyniki wyszukiwania obejmują **każdy** folder.
 
-```
-User types in search bar
+### Przepływ danych — lista haseł z wyszukiwaniem na żywo (live search)
+
+```text
+Użytkownik wpisuje tekst w pasku wyszukiwania
         │
         ▼
 updateSearchQuery(query)
@@ -211,84 +255,97 @@ _searchQuery (MutableStateFlow)
         │
         ▼  flatMapLatest
   query.isBlank?
-   ├── YES → LockItDao.getAllPasswords()      → Flow<List<PasswordEntry>>
-   └── NO  → LockItDao.searchPasswords(query) → Flow<List<PasswordEntry>>
+   ├── TAK → LockItDao.getAllPasswords()      → Flow<List<PasswordEntry>>
+   └── NIE → LockItDao.searchPasswords(query) → Flow<List<PasswordEntry>>
+        │
+        ▼  Repository.map { CryptoManager.decrypt(password) }
         │
         ▼
   passwords (StateFlow) ──► LockerScreen UI (collectAsStateWithLifecycle)
 ```
 
-### Data flow — DAO queries (`LockItDao`)
+LockIt używa biblioteki **Room Persistence Library**. Baza danych nazywa się `lockit_database` (wersja 3) i zawiera trzy encje: `users`, `password_entries` oraz `categories`.
 
-| Function | Return type | Description |
+### Przepływ danych — zapytania DAO (`LockItDao`)
+
+| Funkcja | Zwracany typ | Tłumaczenie opisu |
 | :--- | :--- | :--- |
-| `getUser()` | `suspend User?` | Fetches the single user row (`WHERE id = 1`) |
-| `insertUser(user)` | `suspend` | Insert or replace user (handles both register and profile update) |
-| `getAllPasswords()` | `Flow<List<PasswordEntry>>` | Reactive stream of all entries — emits on every DB change |
-| `insertPassword(entry)` | `suspend` | Insert or replace a password entry |
-| `deletePassword(entry)` | `suspend` | Delete a specific entry |
-| `getPasswordById(id)` | `suspend PasswordEntry?` | Fetch one entry by its ID |
-| `searchPasswords(query)` | `Flow<List<PasswordEntry>>` | Reactive search by `serviceName LIKE '%query%'` |
+| `getUser()` | `suspend User?` | Pobiera pojedynczy wiersz użytkownika (`WHERE id = 1`) |
+| `insertUser(user)` | `suspend` | Wstawia lub zastępuje użytkownika (obsługuje zarówno rejestrację, jak i aktualizację profilu) |
+| `getAllPasswords()` | `Flow<List<PasswordEntry>>` | Reaktywny strumień wszystkich wpisów — emituje dane przy każdej zmianie w bazie (DB) |
+| `getAllPasswordsOnce()` | `suspend List<PasswordEntry>` | Jednorazowy zrzut (snapshot) używany do migracji szyfrowania |
+| `insertPassword(entry)` | `suspend` | Wstawia lub zastępuje wpis z hasłem |
+| `deletePassword(entry)` | `suspend` | Usuwa określony wpis |
+| `getPasswordById(id)` | `suspend PasswordEntry?` | Pobiera pojedynczy wpis na podstawie jego ID |
+| `searchPasswords(query)` | `Flow<List<PasswordEntry>>` | Reaktywne wyszukiwanie za pomocą zapytania `serviceName LIKE '%query%'` |
+| `getAllCategories()` | `Flow<List<Category>>` | Reaktywny strumień wszystkich folderów |
+| `insertCategory(category)` | `suspend` | Dodaje folder (ignorowane w przypadku konfliktu nazw) |
+| `renameCategory(old, new)` / `deleteCategoryByName(name)` | `suspend` | Zmienia nazwę / usuwa folder na podstawie nazwy |
+| `reassignPasswords(old, new)` / `deletePasswordsByCategory(name)` | `suspend` | Przenosi lub usuwa wpisy z folderu |
+| `countPasswordsInCategory(name)` | `suspend Int` | Zlicza wpisy w folderze |
 
----
+> **Granica szyfrowania (Encryption boundary):** DAO zawsze pracuje na **zaszyfrowanej** wartości `password`. `LockItRepository` to jedyne miejsce, które szyfruje przy zapisie i odszyfrowuje przy odczycie (za pomocą `CryptoManager`), dlatego ani DAO, ani baza danych nigdy nie przechowują danych jawnym tekstem (plaintext).
 
-## 🔐 Security
 
-LockIt stores all data locally on-device. No data is transmitted over the network.
+# Bezpieczeństwo
 
-| Aspect | Implementation |
+LockIt przechowuje wszystkie dane lokalnie na urządzeniu. Żadne dane nie są przesyłane przez sieć.
+
+| Aspekt | Implementacja |
 | :--- | :--- |
-| **Storage** | All entries saved to Room SQLite database on-device only |
-| **Master passkey** | Stored in the `users` table; app validates on every launch |
-| **Session** | `currentUser` state is held in memory — cleared on logout or `resetMasterKey()` |
-| **Privacy** | No analytics, no network permissions, no cloud sync |
-| **`lastLogin`** | Updated in DB on every successful authentication via `loadUser()` |
+| **Przechowywanie danych (Storage)** | Wszystkie wpisy zapisywane są w bazie danych Room SQLite wyłącznie lokalnie na urządzeniu (on-device only) |
+| **Hasło główne (Master passkey)** | Zahashowane za pomocą algorytmu **PBKDF2-HMAC-SHA256** + losowa sól (salt) dla każdego użytkownika (`PasswordHasher`); weryfikowane przy każdym uruchomieniu, nigdy nie jest przechowywane otwartym tekstem (in clear / plaintext) |
+| **Szyfrowanie wpisów (Entry encryption)** | Pole `password` jest szyfrowane algorytmem **AES-256-GCM**, a klucz kryptograficzny przechowywany jest w **Android Keystore** (`CryptoManager`) — plik bazy danych (DB) jest bezużyteczny po skopiowaniu go poza urządzenie |
+| **Migracja starych danych (Legacy upgrade)** | Istniejące hasła główne zapisane jawnym tekstem (plaintext) są ponownie hashowane przy pierwszym udanym logowaniu; przestarzałe wpisy z jawnym tekstem są szyfrowane na nowo przy uruchomieniu aplikacji |
+| **Sesja (Session)** | Stan `currentUser` jest utrzymywany w pamięci (in memory) — czyszczony po wylogowaniu lub wywołaniu funkcji `resetMasterKey()` |
+| **Prywatność (Privacy)** | Brak analityki, brak uprawnień sieciowych (network permissions), brak synchronizacji w chmurze |
+| **Maskowanie listy (List masking)** | Lista w sejfie nigdy nie renderuje prawdziwego hasła — wyświetlana jest stała, rozmyta atrapa (decoy), dopóki użytkownik nie kliknie, aby odkryć hasło |
+| **`lastLogin`** | Aktualizowane w bazie danych (DB) przy każdym udanym uwierzytelnieniu za pośrednictwem funkcji `loadUser()` |
 
-> 💡 **Note:** The current implementation stores `passkey` as plain text in the database. A recommended next step would be to hash it using `PBKDF2-HMAC-SHA256` with a random salt before persisting.
+# Zastosowane technologie
 
----
-
-## 🛠️ Technology Stack
-
-| Category | Library / Tool | Version |
+| Kategoria | Biblioteka / Narzędzie | Wersja |
 | :--- | :--- | :--- |
-| Language | Kotlin | 1.9+ |
-| UI | Jetpack Compose | BOM 2024.x |
-| Architecture | MVVM | — |
-| Database | Room (SQLite) — `lockit_database` v1 | 2.6+ |
-| Async | Coroutines + Flow + StateFlow + `flatMapLatest` | — |
-| Image Loading | Coil | 2.x |
-| Media | Media3 / ExoPlayer | 1.x |
-| Navigation | Compose Navigation (routes defined in `Screen.kt`) | 2.7+ |
-| Build | Gradle KTS + Version Catalog (`libs.versions.toml`) | 8.x |
+| Język | Kotlin | 2.1.0 |
+| Interfejs użytkownika (UI) | Jetpack Compose | BOM 2026.02.01 |
+| Architektura | MVVM (Model-View-ViewModel) | — |
+| Baza danych | Room (SQLite) — baza `lockit_database` w wersji v3 | 2.8.4 |
+| Bezpieczeństwo | Hasło główne (passkey): PBKDF2-HMAC-SHA256 + Szyfrowanie wpisów: AES-256-GCM za pośrednictwem Android Keystore | — |
+| Asynchroniczność (Async) | Coroutines (Koprocedury) + Flow + StateFlow + operator `flatMapLatest` | — |
+| Ładowanie obrazów | Coil | 2.7.0 |
+| Media (Audio/Wideo) | Media3 / ExoPlayer | 1.10.1 |
+| Nawigacja | Compose Navigation (ścieżki / routes zdefiniowane w pliku `Screen.kt`) | 2.9.8 |
+| System budowania (Build) | Gradle KTS + Katalog wersji zależności (`libs.versions.toml`) — wtyczka Android Gradle Plugin (AGP) 9.2.1 | — |
 
 ---
 
-## 🚀 Getting Started
+# Uruchomienie projektu
 
-### Prerequisites
-- **Android Studio** Ladybug or newer
+### Wymagania wstępne
+- **Android Studio** Ladybug lub nowsze
 - **JDK 17**
-- **Android SDK** 26+ (target: 34)
+- **Android SDK** — `minSdk 24`, `compileSdk`/`targetSdk 36`
 
-### Build & Run
+### Budowanie
+
+1. Sklonuj repozytorium
 ```bash
-# 1. Clone the repository
-git clone https://github.com/<your-username>/LockIt.git
-
-# 2. Open in Android Studio → File → Open → select the project folder
-
-# 3. Let Gradle sync (first time may take a few minutes)
-
-# 4. Run on emulator or physical device (▶ button)
+git clone https://github.com/<użytkownik>/LockIt.git
 ```
 
-### First Launch
-On the first run, LockIt redirects to **RegisterScreen** where you create a username and master passkey. This creates the singleton `User` row (`id = 1`) in the database. Every subsequent launch goes through **LoginScreen**, which reads that row and validates the entered passkey.
+2. Otwórz w Android Studio
 
----
+3. Poczekaj na synchronizację Gradle
 
-## 📁 Project Structure
+4. Uruchom na emulatorze lub urządzeniu
+
+
+### Pierwsze uruchomienie
+
+Przy pierwszym uruchomieniu aplikacja LockIt przekierowuje na ekran **RegisterScreen**, gdzie tworzysz nazwę użytkownika (username) oraz hasło główne (master passkey). Powoduje to utworzenie w bazie danych pojedynczego wiersza (tzw. singleton) `User` (`id = 1`). Każde kolejne uruchomienie przechodzi przez ekran **LoginScreen**, który odczytuje ten wiersz i weryfikuje wprowadzone hasło.
+
+
+# Struktura Projektu
 
 ```
 LockIt/
@@ -298,56 +355,65 @@ LockIt/
 │       │   ├── java/com/example/lockit/
 │       │   │   ├── data/
 │       │   │   │   ├── local/
-│       │   │   │   │   ├── LockItDao.kt           # All Room queries (DAO interface)
-│       │   │   │   │   ├── LockItDatabase.kt      # Room DB definition, singleton factory
-│       │   │   │   │   └── LockItRepository.kt    # Data access layer between ViewModel and DAO
-│       │   │   │   └── model/
-│       │   │   │       ├── PasswordEntry.kt       # @Entity — table: password_entries
-│       │   │   │       └── User.kt                # @Entity — table: users
+│       │   │   │   │   ├── LockItDao.kt           # Wszystkie zapytania Room (interfejs DAO)
+│       │   │   │   │   └── LockItDatabase.kt      # Definicja bazy danych Room, migracje, singleton
+│       │   │   │   └── LockItRepository.kt        # Warstwa danych + granica szyfrowania (szyfrowanie/odszyfrowywanie)
+│       │   │   ├── model/
+│       │   │   │   ├── PasswordEntry.kt           # @Entity — tabela: password_entries
+│       │   │   │   ├── Category.kt                # @Entity — tabela: categories (foldery)
+│       │   │   │   └── User.kt                    # @Entity — tabela: users
+│       │   │   ├── security/
+│       │   │   │   ├── PasswordHasher.kt          # Hashowanie hasła głównego algorytmem PBKDF2
+│       │   │   │   └── CryptoManager.kt           # Szyfrowanie pól algorytmem AES-GCM (Android Keystore)
 │       │   │   ├── ui/
+│       │   │   │   ├── Screen.kt                  # Stałe ze ścieżkami nawigacji (routes)
+│       │   │   │   ├── icons/
+│       │   │   │   │   └── AppIcons.kt            # Katalog ikon (wykrywany automatycznie) + IconPicker + ServiceIcon
 │       │   │   │   ├── screens/
 │       │   │   │   │   ├── LoginScreen.kt
 │       │   │   │   │   ├── RegisterScreen.kt
 │       │   │   │   │   ├── LockerScreen.kt
 │       │   │   │   │   ├── AccountScreen.kt
 │       │   │   │   │   ├── AddPasswordScreen.kt
-│       │   │   │   │   ├── PasswordDetailsScreen.kt
+│       │   │   │   │   ├── PasswordDetailsScreen.kt # Przestarzały ekran / legacy (brak nawigacji do niego)
 │       │   │   │   │   ├── PassToolsScreen.kt
-│       │   │   │   │   ├── GeneratorScreen.kt
+│       │   │   │   │   ├── PassMakerScreen.kt
 │       │   │   │   │   ├── PassMeterScreen.kt
 │       │   │   │   │   ├── NotificationsScreen.kt
 │       │   │   │   │   ├── AudioPlayerScreen.kt
 │       │   │   │   │   ├── VideoPlayerScreen.kt
 │       │   │   │   │   └── SettingsScreen.kt
 │       │   │   │   └── theme/
-│       │   │   │       ├── Color.kt               # Color palette (Light + Dark)
-│       │   │   │       ├── Theme.kt               # MaterialTheme wrapper
-│       │   │   │       ├── Type.kt                # Typography definitions
-│       │   │   │       └── Screen.kt              # Navigation route constants
+│       │   │   │       ├── Color.kt               # Paleta kolorów (Jasny + Ciemny motyw)
+│       │   │   │       ├── Theme.kt               # Opakowanie (wrapper) dla MaterialTheme
+│       │   │   │       └── Type.kt                # Definicje typografii
+│       │   │   ├── util/
+│       │   │   │   ├── LocaleHelper.kt            # Przełączanie języka w czasie działania aplikacji (per-app locale)
+│       │   │   │   └── SoundPlayer.kt             # Jednorazowe efekty dźwiękowe z folderu res/raw
 │       │   │   ├── viewmodel/
-│       │   │   │   └── LockItViewModel.kt         # Single shared ViewModel + Factory
+│       │   │   │   └── LockItViewModel.kt         # Pojedynczy, współdzielony ViewModel + Factory
 │       │   │   └── MainActivity.kt
 │       │   └── res/
-│       │       ├── drawable/                      # App icons (XML vectors)
-│       │       ├── mipmap-*/                      # Launcher icons (all screen densities)
+│       │       ├── drawable/                      # Ikony aplikacji + zaimportowane ikony wektorowe fi_brands_*
+│       │       ├── raw/                            # Efekty dźwiękowe (np. unlock.mp3) — opcjonalne
+│       │       ├── mipmap-*/                      # Ikony launchera (dla wszystkich gęstości ekranu)
 │       │       ├── values/
 │       │       │   ├── colors.xml
-│       │       │   ├── strings.xml                # English strings
+│       │       │   ├── strings.xml                # Angielskie teksty (strings)
 │       │       │   └── themes.xml
 │       │       ├── values-pl/
-│       │       │   └── strings.xml                # Polish strings
+│       │       │   └── strings.xml                # Polskie teksty (strings)
 │       │       └── xml/
 │       │           ├── backup_rules.xml
 │       │           └── data_extraction_rules.xml
-│       ├── androidTest/                           # Instrumented tests
-│       └── test/                                  # Unit tests
+│       ├── androidTest/                           # Testy instrumentowane (Android)
+│       └── test/                                  # Testy jednostkowe (Unit tests)
 ├── gradle/
 │   └── wrapper/
-│       └── libs.versions.toml                     # Dependency version catalog
+│       └── libs.versions.toml                     # Katalog wersji zależności (version catalog)
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── README.md
 ```
-
 ---
 
