@@ -98,7 +98,7 @@ graph TD
 Aplikacja uruchamia się na ekranie **LoginScreen**, który blokuje dostęp za pomocą klucza głównego. Po uwierzytelnieniu użytkownik trafia do **LockerScreen** — centralnego skarbca. Stamtąd pasek nawigacyjny na dole umożliwia stały dostęp do ekranów **PassToolsScreen** i **SettingsScreen**.
 
 <p align="center">
-  <img src="docs/navmap.jpg" alt="Mapa nawigacji LockIt" width="900">
+  <img src="docs/navmap.png" alt="Mapa nawigacji LockIt" width="900">
 </p>
 
 ### Przegląd ekranów
