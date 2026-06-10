@@ -57,8 +57,6 @@ fun PassMakerScreen(onBack: () -> Unit) {
         }
         val allChars = pools.joinToString("")
 
-        // Reserve the required minimum of each enabled class first, so the result is
-        // guaranteed to contain them even when the length is tight.
         val required = mutableListOf<Char>()
         if (includeNumbers) {
             val n = minNumbers.coerceAtMost(len - required.size).coerceAtLeast(0)
@@ -69,8 +67,6 @@ fun PassMakerScreen(onBack: () -> Unit) {
             repeat(n) { required.add(symbols[Random.nextInt(symbols.length)]) }
         }
 
-        // Fill the remaining slots from the full pool, then shuffle so the required
-        // characters are not stuck at the front.
         val remaining = (len - required.size).coerceAtLeast(0)
         val rest = (1..remaining).map { allChars[Random.nextInt(allChars.length)] }
         generatedPassword = (required + rest).shuffled().joinToString("")

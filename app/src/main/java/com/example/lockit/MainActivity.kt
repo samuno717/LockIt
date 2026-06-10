@@ -99,8 +99,6 @@ fun LockItApp(viewModel: LockItViewModel) {
         }
     ) { innerPadding ->
         if (isLoading) {
-            // Wait for the initial user lookup so we land on the right start screen
-            // instead of briefly flashing Register before Login.
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center

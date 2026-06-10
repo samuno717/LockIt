@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class LockItRepository(private val dao: LockItDao) {
-    // The `password` field is encrypted at rest; decrypt on the way out, encrypt on the way in.
     val allPasswords: Flow<List<PasswordEntry>> =
         dao.getAllPasswords().map { list -> list.map { it.decryptedPassword() } }
     val allCategories: Flow<List<Category>> = dao.getAllCategories()
@@ -24,7 +23,6 @@ class LockItRepository(private val dao: LockItDao) {
     fun searchPasswords(query: String): Flow<List<PasswordEntry>> =
         dao.searchPasswords(query).map { list -> list.map { it.decryptedPassword() } }
 
-    /** One-time pass that encrypts any rows still stored as plaintext. */
     suspend fun encryptLegacyPasswords() {
         dao.getAllPasswordsOnce().forEach { entry ->
             if (!CryptoManager.isEncrypted(entry.password)) {

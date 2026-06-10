@@ -6,25 +6,14 @@ import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-/**
- * One-way hashing for the master passkey (PBKDF2 + random salt).
- *
- * The encoded form is self-describing so old hashes keep verifying after parameter changes:
- *
- *     pbkdf2$<algoTag>$<iterations>$<saltB64>$<hashB64>
- *
- * Legacy plaintext passkeys (created before hashing existed) are detected by the absence of
- * the `pbkdf2$` prefix; [verify] then compares directly and [needsUpgrade] reports `true`
- * so the caller can re-store a proper hash.
- */
 object PasswordHasher {
     private const val PREFIX = "pbkdf2"
     private const val ITERATIONS = 120_000
     private const val KEY_LENGTH = 256
     private const val SALT_BYTES = 16
 
-    private const val ALGO_SHA256 = "PBKDF2WithHmacSHA256" // API 26+
-    private const val ALGO_SHA1 = "PBKDF2WithHmacSHA1"     // available everywhere
+    private const val ALGO_SHA256 = "PBKDF2WithHmacSHA256"
+    private const val ALGO_SHA1 = "PBKDF2WithHmacSHA1"
 
     fun hash(passkey: String): String {
         val salt = ByteArray(SALT_BYTES).also { SecureRandom().nextBytes(it) }
@@ -34,7 +23,7 @@ object PasswordHasher {
     }
 
     fun verify(passkey: String, stored: String): Boolean {
-        if (!isHashed(stored)) return stored == passkey // legacy plaintext
+        if (!isHashed(stored)) return stored == passkey
         return try {
             val parts = stored.split("$")
             val algo = algoFor(parts[1])
@@ -50,7 +39,6 @@ object PasswordHasher {
 
     fun isHashed(stored: String): Boolean = stored.startsWith("$PREFIX$")
 
-    /** Plaintext (or otherwise non-hashed) values should be re-stored as a hash. */
     fun needsUpgrade(stored: String): Boolean = !isHashed(stored)
 
     private fun preferredAlgorithm(): Pair<String, String> = try {

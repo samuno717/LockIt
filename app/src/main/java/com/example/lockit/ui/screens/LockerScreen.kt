@@ -60,7 +60,6 @@ fun LockerScreen(
     var editingCategory by remember { mutableStateOf<String?>(null) }
     var editingCount by remember { mutableStateOf(0) }
 
-    // Keep the selection valid as folders load or get added/removed.
     LaunchedEffect(categories) {
         if (categories.isNotEmpty() && selectedCategory !in categories) {
             selectedCategory = if ("Social Media" in categories) "Social Media" else categories.first()
@@ -90,7 +89,6 @@ fun LockerScreen(
             },
             onDelete = {
                 viewModel.deleteCategory(cat)
-                // Clearing the selection lets the LaunchedEffect pick a valid folder.
                 if (selectedCategory == cat) selectedCategory = ""
                 editingCategory = null
             }
@@ -188,8 +186,6 @@ fun LockerScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // While searching, show matches from every folder; otherwise scope to the
-                // selected folder.
                 val visiblePasswords = if (searchQuery.isBlank()) {
                     passwords.filter { it.category == selectedCategory || selectedCategory == "All" }
                 } else {
@@ -349,7 +345,6 @@ fun PasswordItem(password: PasswordEntry, onDelete: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            // Details open only once the password has been revealed.
             .clickable(enabled = revealed) { showDetailsPopup = true },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -402,7 +397,6 @@ fun PasswordItem(password: PasswordEntry, onDelete: () -> Unit) {
 
 @Composable
 private fun EyeToggleIcon(revealed: Boolean, contentDescription: String?) {
-    // Animate the strike-through: 0 = no slash (revealed), 1 = full slash (hidden).
     val slash by animateFloatAsState(
         targetValue = if (revealed) 0f else 1f,
         animationSpec = tween(durationMillis = 250),
@@ -437,12 +431,9 @@ private fun EyeToggleIcon(revealed: Boolean, contentDescription: String?) {
     }
 }
 
-// Pool used to build a fake password placeholder. The decoy is NOT the real password,
-// so the actual value is never drawn on screen until the user reveals it.
 private const val DECOY_POOL = "wRtPmZqLkXn7bV4aHs9"
 
 private fun decoyFor(password: String): String {
-    // Track the real length so the blur looks proportional, but clamp to a single line.
     val n = password.length.coerceIn(6, 14)
     return (0 until n).map { DECOY_POOL[it % DECOY_POOL.length] }.joinToString("")
 }
@@ -451,14 +442,8 @@ private fun decoyFor(password: String): String {
 private fun RevealablePassword(password: String, revealed: Boolean) {
     val decoy = remember(password) { decoyFor(password) }
 
-    // Modifier.blur only renders on Android 12+ (API 31). On older devices fall back to
-    // dots rather than showing the decoy letters un-blurred.
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-    // Crossfade gives a short, smooth fade between blurred decoy and the real value. Both
-    // states fill the full width and centre their text, so the value stays put (no left
-    // shift) and the tile never resizes while toggling. The real password is only composed
-    // while it is actually being revealed.
     Crossfade(
         targetState = revealed,
         animationSpec = tween(durationMillis = 220),
@@ -510,7 +495,6 @@ private fun PasswordDetailsPopup(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                // Header: avatar + service name + password, mirroring the list tile.
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ServiceIcon(serviceName = password.serviceName, iconKey = password.iconKey)
                     Column(

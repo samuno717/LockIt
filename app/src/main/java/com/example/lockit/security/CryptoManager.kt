@@ -9,17 +9,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/**
- * Reversible field encryption for stored credentials.
- *
- * Uses an AES-256-GCM key kept in the Android Keystore — the key never leaves secure
- * hardware, so the database file is useless if copied off the device. Output format:
- *
- *     enc1:<Base64(iv ‖ ciphertext+tag)>
- *
- * Values without the `enc1:` prefix are treated as legacy plaintext and returned untouched
- * (see [isEncrypted]), which lets old rows be read and migrated lazily.
- */
 object CryptoManager {
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     private const val KEY_ALIAS = "lockit_entry_key"
@@ -39,7 +28,7 @@ object CryptoManager {
     }
 
     fun decrypt(stored: String): String {
-        if (!isEncrypted(stored)) return stored // legacy plaintext
+        if (!isEncrypted(stored)) return stored
         return try {
             val data = Base64.decode(stored.removePrefix(PREFIX), Base64.NO_WRAP)
             val iv = data.copyOfRange(0, IV_SIZE)
@@ -48,7 +37,6 @@ object CryptoManager {
             cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(TAG_BITS, iv))
             String(cipher.doFinal(cipherText), Charsets.UTF_8)
         } catch (e: Exception) {
-            // Key invalidated or data corrupt — fail safe rather than crash the list.
             ""
         }
     }

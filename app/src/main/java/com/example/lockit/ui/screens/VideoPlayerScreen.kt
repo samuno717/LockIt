@@ -23,7 +23,6 @@ fun VideoPlayerScreen(onBack: () -> Unit) {
     
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            // Próba załadowania lokalnego pliku tutorial.mp4 z res/raw
             val packagePath = "android.resource://${context.packageName}/${R.raw.tutorial}"
             setMediaItem(MediaItem.fromUri(packagePath))
             prepare()

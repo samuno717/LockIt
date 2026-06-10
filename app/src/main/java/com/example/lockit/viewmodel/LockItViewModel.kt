@@ -18,8 +18,6 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    // True until the initial user lookup finishes — used to avoid flashing the wrong
-    // start screen before we know whether an account exists.
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -43,7 +41,6 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
 
     init {
         loadUser()
-        // Encrypt any password rows left over from before field encryption existed.
         viewModelScope.launch {
             repository.encryptLegacyPasswords()
         }
@@ -61,10 +58,8 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
         val trimmed = newName.trim()
         if (trimmed.isEmpty() || trimmed == oldName) return
         viewModelScope.launch {
-            // Move the entries onto the new name first so nothing is orphaned.
             repository.reassignPasswords(oldName, trimmed)
             if (repository.categoryExists(trimmed)) {
-                // Target folder already exists -> merge by dropping the old one.
                 repository.deleteCategoryByName(oldName)
             } else {
                 repository.renameCategory(oldName, trimmed)
@@ -104,10 +99,6 @@ class LockItViewModel(private val repository: LockItRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Verifies the entered passkey against the stored hash. If the stored value is still
-     * legacy plaintext, it is transparently upgraded to a hash on the first successful login.
-     */
     fun verifyPasskey(input: String): Boolean {
         val user = _currentUser.value ?: return false
         val ok = PasswordHasher.verify(input, user.passkey)

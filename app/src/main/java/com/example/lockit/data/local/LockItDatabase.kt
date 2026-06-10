@@ -20,7 +20,6 @@ abstract class LockItDatabase : RoomDatabase() {
 
         private val DEFAULT_CATEGORIES = listOf("Vault", "Games", "Social Media", "Work")
 
-        // v1 -> v2: introduce the categories table and seed the default folders.
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -36,14 +35,12 @@ abstract class LockItDatabase : RoomDatabase() {
             }
         }
 
-        // v2 -> v3: add the per-entry icon key (drawable resource name).
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE password_entries ADD COLUMN iconKey TEXT NOT NULL DEFAULT ''")
             }
         }
 
-        // Seed the default folders on a brand-new install (no migration runs).
         private val SEED_CALLBACK = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)

@@ -91,7 +91,6 @@ fun AddPasswordScreen(
                             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        // Transparent overlay so a tap anywhere on the field opens the menu.
                         Box(
                             modifier = Modifier
                                 .matchParentSize()

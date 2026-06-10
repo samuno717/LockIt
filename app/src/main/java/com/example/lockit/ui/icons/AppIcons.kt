@@ -39,21 +39,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.lockit.R
 
-/**
- * One selectable icon. [key] is the drawable resource name (e.g. "fi_brands_steam") and is
- * what gets persisted in [com.example.lockit.model.PasswordEntry.iconKey].
- */
 data class IconOption(val key: String, val label: String)
 
 object AppIcons {
     const val NONE = ""
 
-    /**
-     * Every drawable that looks like an imported icon-pack glyph. Flaticon "Uicons" SVGs,
-     * once imported via Android Studio's Vector Asset tool, land as `fi_brands_*`, `fi_rr_*`,
-     * `fi_sr_*`, etc. — so whatever the user imports shows up here automatically, with no
-     * hard-coded list to maintain.
-     */
     fun available(): List<IconOption> {
         return R.drawable::class.java.fields
             .map { it.name }
@@ -81,7 +71,6 @@ object AppIcons {
 @Composable
 fun rememberAvailableIcons(): List<IconOption> = remember { AppIcons.available() }
 
-/** Resolves a drawable name to its resource id, or 0 when the file is not present. */
 @Composable
 fun rememberIconResId(resName: String?): Int {
     if (resName.isNullOrBlank()) return 0
@@ -91,10 +80,6 @@ fun rememberIconResId(resName: String?): Int {
     }
 }
 
-/**
- * Avatar for a saved login: shows the chosen icon when its drawable exists, otherwise
- * falls back to the first letter of the service name.
- */
 @Composable
 fun ServiceIcon(
     serviceName: String,
@@ -126,10 +111,6 @@ fun ServiceIcon(
     }
 }
 
-/**
- * Compact icon selector: shows the current choice and opens a searchable grid dialog.
- * Scales to hundreds of imported icons.
- */
 @Composable
 fun IconPicker(
     selectedKey: String,
